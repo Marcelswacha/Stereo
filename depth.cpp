@@ -156,28 +156,28 @@ int main(int argc, char** argv)
 	initUndistortRectifyMap(M2, D2, R2, P2, IMG_SIZE, CV_16SC2, map21, map22);
 
 	int PreFilterCap = 31;
-	//int PreFilterSize = 5;
-	int SADWindowSize = 9;
+	int SADWindowSize = 3;
 	int MinDisparity = 100;
 	int NumberOfDisparities = 128;
 	int TextureThreshold = 15;
-	int UniqnessRatio = 15;
+	int UniqnessRatio = 10;
 	int SpeckleWindowSize = 100;
 	int SpeckleRange = 32;
 	int MaxDiff = 1;
 
-	StereoBM bm;
-	bm.state->roi1 = roi1;
-	bm.state->roi2 = roi2;
-	bm.state->preFilterCap = PreFilterCap;
-    bm.state->SADWindowSize =  SADWindowSize;
-    bm.state->minDisparity = MinDisparity-100;
-    bm.state->numberOfDisparities = NumberOfDisparities;
-    bm.state->textureThreshold = TextureThreshold;
-    bm.state->uniquenessRatio = UniqnessRatio;
-    bm.state->speckleWindowSize = SpeckleWindowSize;
-    bm.state->speckleRange = SpeckleRange;
-    bm.state->disp12MaxDiff = MaxDiff;
+	StereoSGBM bm;
+	int cn = 3;
+	
+	bm.preFilterCap = PreFilterCap;
+    bm.SADWindowSize =  SADWindowSize;
+	bm.P1 = 8*cn*bm.SADWindowSize*bm.SADWindowSize;
+	bm.P2 = 32*cn*bm.SADWindowSize*bm.SADWindowSize;
+    bm.minDisparity = MinDisparity-100;
+    bm.numberOfDisparities = NumberOfDisparities;
+    bm.uniquenessRatio = UniqnessRatio;
+    bm.speckleWindowSize = SpeckleWindowSize;
+    bm.speckleRange = SpeckleRange;
+    bm.disp12MaxDiff = MaxDiff;
     
     namedWindow("Track Bar Window", CV_WINDOW_NORMAL);
     
@@ -185,7 +185,6 @@ int main(int argc, char** argv)
     cvCreateTrackbar("Number of Disparities", "Track Bar Window", &NumberOfDisparities, mW);
     cvCreateTrackbar("SAD", "Track Bar Window", &SADWindowSize, 100);
     cvCreateTrackbar("Minimum Disparity", "Track Bar Window", &MinDisparity, 200);
-    cvCreateTrackbar("Texture Threshold", "Track Bar Window", &TextureThreshold, 100);
     cvCreateTrackbar("Uniqueness Ratio", "Track Bar Window", &UniqnessRatio, 100);
     cvCreateTrackbar("Speckle Window Size", "Track Bar Window", &SpeckleWindowSize, 200);
     cvCreateTrackbar("Speckle Range", "Track Bar Window", &SpeckleRange, 500);
@@ -214,15 +213,16 @@ int main(int argc, char** argv)
         if (NumberOfDisparities % 16 != 0)
             NumberOfDisparities = NumberOfDisparities + (16 - NumberOfDisparities % 16);
             
-       	bm.state->preFilterCap = PreFilterCap;
-		bm.state->SADWindowSize =  SADWindowSize;
-		bm.state->minDisparity = MinDisparity-100;
-		bm.state->numberOfDisparities = NumberOfDisparities;
-		bm.state->textureThreshold = TextureThreshold*0.01;
-		bm.state->uniquenessRatio = 0.01*UniqnessRatio;
-		bm.state->speckleWindowSize = SpeckleWindowSize;
-		bm.state->speckleRange = SpeckleRange;
-		bm.state->disp12MaxDiff = MaxDiff;
+       	bm.preFilterCap = PreFilterCap;
+		bm.SADWindowSize =  SADWindowSize;
+		bm.P1 = 8*cn*bm.SADWindowSize*bm.SADWindowSize;
+		bm.P2 = 32*cn*bm.SADWindowSize*bm.SADWindowSize;
+		bm.minDisparity = MinDisparity-100;
+		bm.numberOfDisparities = NumberOfDisparities;
+		bm.uniquenessRatio = UniqnessRatio;
+		bm.speckleWindowSize = SpeckleWindowSize;
+		bm.speckleRange = SpeckleRange;
+		bm.disp12MaxDiff = MaxDiff;
                   
      // Capture images
 		cap1 >> img1;
